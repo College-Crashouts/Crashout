@@ -1,6 +1,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -8,6 +9,7 @@ plugins {
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
     id("com.google.gms.google-services")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 kotlin {
@@ -84,3 +86,35 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
 }
 
+
+
+//val secrets = Properties().apply {
+//    load(rootProject.file("secrets.properties").inputStream())
+//}
+//
+//kotlin {
+//    sourceSets {
+//        val commonMain by getting {
+//            dependencies {
+//                // Your dependencies
+//            }
+//        }
+//        val commonTest by getting {
+//            dependencies {
+//                // Your test dependencies
+//            }
+//        }
+//    }
+//}
+//
+//tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+//    kotlinOptions {
+//        freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+//    }
+//}
+//
+//android {
+//    defaultConfig {
+//        buildConfigField("String", "MAPS_API_KEY", secrets.getProperty("MAPS_API_KEY"))
+//    }
+//}

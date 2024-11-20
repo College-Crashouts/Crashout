@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+
 import crashout.composeapp.generated.resources.Res
 import crashout.composeapp.generated.resources.compose_multiplatform
 import dev.gitlive.firebase.Firebase
@@ -29,6 +30,8 @@ fun App() {
         var firebaseUser by remember { mutableStateOf<FirebaseUser?>(null) }
         var userEmail by remember { mutableStateOf("") }
         var userPassword by remember { mutableStateOf("") }
+        var showMap by remember { mutableStateOf(false) }
+
 
         if (firebaseUser == null) {
             Column(
@@ -70,22 +73,33 @@ fun App() {
                 }
             }
         } else {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = firebaseUser?.uid ?: "Unknown ID")
-                Spacer(modifier = Modifier.height(24.dp))
-                Button(
-                    onClick = {
-                        scope.launch {
-                            auth.signOut()
-                            firebaseUser = auth.currentUser
-                        }
-                    }
+            if (showMap) {
+                MapComponent()
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(text = "Sign out")
+                    Text(text = firebaseUser?.uid ?: "Unknown ID")
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                auth.signOut()
+                                firebaseUser = auth.currentUser
+                            }
+                        }
+                    ) {
+                        Text(text = "Sign out")
+                    }
+                    Button(
+                        onClick = {
+                            showMap = true
+                        }
+                    ) {
+                        Text(text = "Map")
+                    }
                 }
             }
         }
