@@ -14,4 +14,4 @@ Casey Reyes
 
 Joaquin Feria - joaquincarlosferia@gmail.com
 
-Nicholas Brigida
+Nicholas Brigida - brigida@wisc.edu
