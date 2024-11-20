@@ -1,4 +1,6 @@
 package org.acjn.crashout
 
-class Map {
-}
+import androidx.compose.runtime.Composable
+
+@Composable
+expect fun MapComponent()

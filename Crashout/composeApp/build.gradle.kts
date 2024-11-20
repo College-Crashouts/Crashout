@@ -44,7 +44,7 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
-
+            implementation("com.google.maps.android:maps-compose:6.1.0")
             implementation(libs.firebase.auth)
         }
     }
@@ -78,6 +78,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.compose.foundation:foundation-layout-android:1.6.7")
     debugImplementation(compose.uiTooling)
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
     implementation("com.google.firebase:firebase-analytics")
