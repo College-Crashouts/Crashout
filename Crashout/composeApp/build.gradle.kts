@@ -48,7 +48,13 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation("com.google.maps.android:maps-compose:6.1.0")
             implementation(libs.firebase.auth)
+            implementation("io.github.mirzemehdi:kmpauth-google:2.0.0") //Google One Tap Sign-In
+            implementation("io.github.mirzemehdi:kmpauth-firebase:2.0.0") //Integrated Authentications with Firebase
+            implementation("io.github.mirzemehdi:kmpauth-uihelper:2.0.0") //UiHelper SignIn buttons (AppleSignIn, GoogleSignInButton)
         }
+    }
+
+}
     }
 }
 
