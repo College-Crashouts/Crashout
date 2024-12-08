@@ -2,6 +2,7 @@ package org.acjn.crashout
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
@@ -11,11 +12,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.foundation.clickable
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.icons.filled.LocationOn
 
 import crashout.composeapp.generated.resources.Res
 import crashout.composeapp.generated.resources.compose_multiplatform
@@ -83,96 +88,123 @@ fun App() {
                     MapComponent()
                 }
                 showAccountInfo -> {
-                    // Account Info Screen
+                    //Account Info Screen
+                    var showPassword by remember { mutableStateOf(false) }
+                    var newPassword by remember { mutableStateOf("") }
+                    var showChangePasswordDialog by remember { mutableStateOf(false) }
+
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(20.dp),
                         horizontalAlignment = Alignment.Start
                     ) {
-                        // Profile Section
+                        //Profile
                         Box(
                             modifier = Modifier.fillMaxWidth(),
                             contentAlignment = Alignment.Center
                         ) {
-                            // Placeholder for profile image
-                            Surface(
+                            Image(
+                                painter = painterResource(Res.drawable.compose_multiplatform),  //replace this with profile image resource
+                                contentDescription = "Profile Picture",
                                 modifier = Modifier
-                                    .size(150.dp)
+                                    .size(100.dp)
                                     .clip(CircleShape),
-                                color = MaterialTheme.colors.primary.copy(alpha = 0.1f)
-                            ) {
-                                // You can add an actual image here later
-                            }
+                                contentScale = ContentScale.Crop
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        // Name Section
-                        Text(
-                            text = "Name:",
-                            style = MaterialTheme.typography.subtitle1
-                        )
+                        //Name
+                        Text(text = "Name:", style = MaterialTheme.typography.body1)
                         Text(
                             text = firebaseUser?.displayName ?: "Unknown",
                             style = MaterialTheme.typography.h6,
-                            color = MaterialTheme.colors.primary
+                            color = Color(0xFFE91E63)
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Email Section
+                        //Email
+                        Text(text = "Email:", style = MaterialTheme.typography.body1)
                         Text(
-                            text = "Email:",
-                            style = MaterialTheme.typography.subtitle1
-                        )
-                        Text(
-                            text = firebaseUser?.email ?: "Unknown",
+                            text = firebaseUser?.email?.let { email ->
+                                val username = email.substringBefore('@')
+                                "******@${email.substringAfter('@')}"
+                            } ?: "Unknown",
                             style = MaterialTheme.typography.h6,
-                            color = MaterialTheme.colors.primary
+                            color = Color(0xFFE91E63)
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
 
                         // Password Section
-                        Text(
-                            text = "Password:",
-                            style = MaterialTheme.typography.subtitle1
-                        )
+                        Text(text = "Password:", style = MaterialTheme.typography.body1)
                         TextButton(
-                            onClick = { /* Implement password view */ },
+                            onClick = { showPassword = !showPassword },
                             modifier = Modifier.padding(vertical = 4.dp)
                         ) {
                             Text("View Password")
                         }
                         TextButton(
-                            onClick = { /* Implement password change */ },
+                            onClick = { showChangePasswordDialog = true },
                             modifier = Modifier.padding(vertical = 4.dp)
                         ) {
                             Text("Change Password")
                         }
 
+                        //Password change dialog
+                        if (showChangePasswordDialog) {
+                            AlertDialog(
+                                onDismissRequest = { showChangePasswordDialog = false },
+                                title = { Text("Change Password") },
+                                text = {
+                                    TextField(
+                                        value = newPassword,
+                                        onValueChange = { newPassword = it },
+                                        placeholder = { Text("New Password") },
+                                        visualTransformation = PasswordVisualTransformation()
+                                    )
+                                },
+                                confirmButton = {
+                                    Button(onClick = {
+                                        scope.launch {
+                                            try {
+                                                firebaseUser?.updatePassword(newPassword)
+                                                showChangePasswordDialog = false
+                                                newPassword = ""
+                                            } catch (e: Exception) { }
+                                        }
+                                    }) {
+                                        Text("Update")
+                                    }
+                                },
+                                dismissButton = {
+                                    Button(onClick = { showChangePasswordDialog = false }) {
+                                        Text("Cancel")
+                                    }
+                                }
+                            )
+                        }
+
                         Spacer(modifier = Modifier.weight(1f))
 
-                        // Bottom Navigation
+                        //Bottom Navigation - is this supposed to stay the same for all pages? CHECK
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 16.dp),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            IconButton(onClick = { showMap = false; showAccountInfo = false }) {
-                                Icon(Icons.Filled.Home, "Home")
-                            }
-                            IconButton(onClick = { /* Implement target navigation */ }) {
-                                //Icon(Icons.Filled.RadioButtonChecked, "Target")
-                            }
-                            IconButton(onClick = { showMap = true; showAccountInfo = false }) {
-                                Icon(Icons.Filled.PlayArrow, "Play")
-                            }
-                            IconButton(onClick = { showMap = false; showAccountInfo = true }) {
-                                Icon(Icons.Filled.Person, "Profile")
-                            }
+                            Icon(Icons.Filled.Home, "Home",
+                                modifier = Modifier.clickable { showMap = false; showAccountInfo = false })
+                            Icon(Icons.Filled.LocationOn, "Target",
+                                modifier = Modifier.clickable { /* target navigation */ })
+                            Icon(Icons.Filled.PlayArrow, "Play",
+                                modifier = Modifier.clickable { showMap = true; showAccountInfo = false })
+                            Icon(Icons.Filled.Person, "Profile",
+                                modifier = Modifier.clickable { showMap = false; showAccountInfo = true })
                         }
                     }
                 }
