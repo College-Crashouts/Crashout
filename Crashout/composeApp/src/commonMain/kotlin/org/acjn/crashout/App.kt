@@ -87,8 +87,8 @@ fun App() {
                 }
                 showAccountInfo -> {
                     //Account Info Screen
-                    var showPassword by remember { mutableStateOf(false) }
-                    var newPassword by remember { mutableStateOf("") }
+                    var showChangeNameDialog by remember { mutableStateOf(false) }
+                    var newDisplayName by remember { mutableStateOf("") }
                     var showChangePasswordDialog by remember { mutableStateOf(false) }
 
                     Column(
@@ -97,13 +97,13 @@ fun App() {
                             .padding(20.dp),
                         horizontalAlignment = Alignment.Start
                     ) {
-                        //Profile
+                        //Prof image
                         Box(
                             modifier = Modifier.fillMaxWidth(),
                             contentAlignment = Alignment.Center
                         ) {
                             Image(
-                                painter = painterResource(Res.drawable.compose_multiplatform),  //replace this with profile image resource
+                                painter = painterResource(Res.drawable.compose_multiplatform),
                                 contentDescription = "Profile Picture",
                                 modifier = Modifier
                                     .size(100.dp)
@@ -121,57 +121,42 @@ fun App() {
                             style = MaterialTheme.typography.h6,
                             color = Color(0xFFE91E63)
                         )
+                        TextButton(
+                            onClick = { showChangeNameDialog = true },
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        ) {
+                            Text("Change Name")
+                        }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
                         //Email
                         Text(text = "Email:", style = MaterialTheme.typography.body1)
                         Text(
-                            text = firebaseUser?.email?.let { email ->
-                                val username = email.substringBefore('@')
-                                "******@${email.substringAfter('@')}"
-                            } ?: "Unknown",
+                            text = firebaseUser?.email ?: "Unknown",
                             style = MaterialTheme.typography.h6,
                             color = Color(0xFFE91E63)
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Password Section
-                        Text(text = "Password:", style = MaterialTheme.typography.body1)
-                        TextButton(
-                            onClick = { showPassword = !showPassword },
-                            modifier = Modifier.padding(vertical = 4.dp)
-                        ) {
-                            Text("View Password")
-                        }
-                        TextButton(
-                            onClick = { showChangePasswordDialog = true },
-                            modifier = Modifier.padding(vertical = 4.dp)
-                        ) {
-                            Text("Change Password")
-                        }
-
-                        //Password change dialog
-                        if (showChangePasswordDialog) {
+                        //Name change dialog
+                        if (showChangeNameDialog) {
                             AlertDialog(
-                                onDismissRequest = { showChangePasswordDialog = false },
-                                title = { Text("Change Password") },
+                                onDismissRequest = { showChangeNameDialog = false },
+                                title = { Text("Change Display Name") },
                                 text = {
                                     TextField(
-                                        value = newPassword,
-                                        onValueChange = { newPassword = it },
-                                        placeholder = { Text("New Password") },
-                                        visualTransformation = PasswordVisualTransformation()
+                                        value = newDisplayName,
+                                        onValueChange = { newDisplayName = it },
+                                        placeholder = { Text("New Display Name") }
                                     )
                                 },
                                 confirmButton = {
                                     Button(onClick = {
                                         scope.launch {
                                             try {
-                                                firebaseUser?.updatePassword(newPassword)
-                                                showChangePasswordDialog = false
-                                                newPassword = ""
+                                                firebaseUser?.updateProfile(displayName = newDisplayName)
+                                                showChangeNameDialog = false
+                                                newDisplayName = ""
                                             } catch (e: Exception) { }
                                         }
                                     }) {
@@ -179,15 +164,16 @@ fun App() {
                                     }
                                 },
                                 dismissButton = {
-                                    Button(onClick = { showChangePasswordDialog = false }) {
+                                    Button(onClick = { showChangeNameDialog = false }) {
                                         Text("Cancel")
                                     }
-                                }                            )
+                                }
+                            )
                         }
 
                         Spacer(modifier = Modifier.weight(1f))
 
-                        //Bottom Navigation - is this supposed to stay the same for all pages? CHECK
+                        //Bottom navigation
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -195,15 +181,22 @@ fun App() {
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
                             Icon(Icons.Filled.Home, "Home",
-                                modifier = Modifier.clickable { showMap = false; showAccountInfo = false })
+                                modifier = Modifier.clickable {
+                                    showMap = false; showAccountInfo = false
+                                })
                             Icon(Icons.Filled.LocationOn, "Target",
                                 modifier = Modifier.clickable { /* target navigation */ })
                             Icon(Icons.Filled.PlayArrow, "Play",
-                                modifier = Modifier.clickable { showMap = true; showAccountInfo = false })
+                                modifier = Modifier.clickable {
+                                    showMap = true; showAccountInfo = false
+                                })
                             Icon(Icons.Filled.Person, "Profile",
-                                modifier = Modifier.clickable { showMap = false; showAccountInfo = true })
+                                modifier = Modifier.clickable {
+                                    showMap = false; showAccountInfo = true
+                                })
                         }
-                    }                }
+                    }
+                }
                 else -> {
                     // Home Screen
                     Column(
