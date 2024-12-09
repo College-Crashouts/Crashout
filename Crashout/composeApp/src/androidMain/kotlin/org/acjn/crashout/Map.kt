@@ -7,8 +7,10 @@ import android.os.Build
 import android.os.Looper
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.material.Icon
@@ -16,10 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -34,7 +33,20 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.delay
 import androidx.compose.material.*
-import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
+import crashout.composeapp.generated.resources.Res
+import crashout.composeapp.generated.resources.compose_multiplatform
+import dev.gitlive.firebase.Firebase
+import dev.gitlive.firebase.auth.FirebaseAuth
+import dev.gitlive.firebase.auth.FirebaseUser
+import dev.gitlive.firebase.auth.auth
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
 
 
 class AndroidPlatform : Platform {
@@ -113,28 +125,31 @@ actual fun MapComponent() {
             }
         }
 
-        BottomAppBar(
-            modifier = Modifier.fillMaxWidth(),
-            backgroundColor = MaterialTheme.colors.primary
-        ) {
-            Icon(
-                Icons.Filled.Home, "Home",
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable { showMap = false; showAccountInfo = false })
-            Icon(
-                Icons.Filled.LocationOn, "Target",
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable { /* target navigation */ })
-
-            Icon(
-                Icons.Filled.Person, "Profile",
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable { showMap = false; showAccountInfo = true })
-        }
+//        BottomAppBar(
+//            modifier = Modifier.fillMaxWidth(),
+//            backgroundColor = MaterialTheme.colors.primary
+//        ) {
+//            Icon(
+//                Icons.Filled.Home, "Home",
+//                modifier = Modifier
+//                    .weight(1f)
+//                    .clickable { showMap = false; showAccountInfo = false })
+//            Icon(
+//                Icons.Filled.LocationOn, "Target",
+//                modifier = Modifier
+//                    .weight(1f)
+//                    .clickable { /* target navigation */ })
+//
+//            Icon(
+//                Icons.Filled.Person, "Profile",
+//                modifier = Modifier
+//                    .weight(1f)
+//                    .clickable { showMap = false; showAccountInfo = true })
+//        }
     }
+    when {showAccountInfo ->{
+        Login()
+    }}
 }
 
 @SuppressLint("MissingPermission")
@@ -169,3 +184,5 @@ fun updateMarkers(markers: MutableList<LatLng>, newLocation: LatLng) {
     markers.clear() // Remove old markers
     markers.add(newLocation) // Add the new marker
 }
+
+
