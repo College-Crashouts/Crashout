@@ -44,6 +44,7 @@ fun App() {
 
         if (firebaseUser == null) {
             // Login Screen
+
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -187,25 +188,37 @@ fun App() {
 
                         Spacer(modifier = Modifier.weight(1f))
 
-                        //Bottom Navigation - is this supposed to stay the same for all pages? CHECK
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            Icon(Icons.Filled.Home, "Home",
-                                modifier = Modifier.clickable { showMap = false; showAccountInfo = false })
-                            Icon(Icons.Filled.LocationOn, "Target",
-                                modifier = Modifier.clickable { /* target navigation */ })
-                            Icon(Icons.Filled.PlayArrow, "Play",
-                                modifier = Modifier.clickable { showMap = true; showAccountInfo = false })
-                            Icon(Icons.Filled.Person, "Profile",
-                                modifier = Modifier.clickable { showMap = false; showAccountInfo = true })
-                        }
-                    }                }
+
+                    }
+
+                }
                 else -> {
                     // Home Screen
+                    // Login Screen
+                    Scaffold(
+                        bottomBar = {
+                            BottomAppBar(
+                                modifier = Modifier.fillMaxWidth(),
+                                backgroundColor = MaterialTheme.colors.primary
+                            ) {
+                                Icon(
+                                    Icons.Filled.Home, "Home",
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clickable { showMap = false; showAccountInfo = false })
+                                Icon(
+                                    Icons.Filled.LocationOn, "Target",
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clickable { /* target navigation */ })
+                                Icon(
+                                    Icons.Filled.Person, "Profile",
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clickable { showMap = false; showAccountInfo = true })
+                            }
+                        }
+                    ) {}
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.Center,
@@ -236,8 +249,12 @@ fun App() {
                         ) {
                             Text(text = "Account Info")
                         }
-                    }                }
+
+                    }
+
+                }
             }
+
         }
     }
 }
