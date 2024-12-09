@@ -69,6 +69,14 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.delay
+import androidx.compose.material.Button
+import androidx.compose.material.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
 
 class AndroidPlatform : Platform {
     override val name: String = "Android ${Build.VERSION.SDK_INT}"
@@ -82,6 +90,7 @@ actual fun MapComponent() {
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     var userLocation by remember { mutableStateOf<LatLng?>(null) }
+    val markerState = remember { mutableStateOf<LatLng?>(null) }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -113,14 +122,11 @@ actual fun MapComponent() {
         }
     }
 
-    // Periodically log location every 30 seconds
+    // Update marker and camera position whenever userLocation changes
     LaunchedEffect(userLocation) {
-        while (true) {
-            userLocation?.let { location ->
-                cameraPositionState.position = CameraPosition.fromLatLngZoom(location, 15f)
-                println("User's current location: ${location.latitude}, ${location.longitude}")
-            }
-            delay(15_000L)
+        userLocation?.let { location ->
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(location, 15f)
+            markerState.value = location
         }
     }
 
@@ -131,12 +137,30 @@ actual fun MapComponent() {
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState
         ) {
-            userLocation?.let { location ->
+            markerState.value?.let { location ->
                 Marker(
                     state = rememberMarkerState(position = location),
                     title = "Your Location",
                     snippet = "This is your current location"
                 )
+            }
+        }
+
+        // print the current coordinates
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 22.dp)
+        ) {
+            Spacer(modifier = Modifier.height(100.dp))
+            Button(
+                onClick = {
+                    userLocation?.let { location ->
+                        println("Button clicked! Current location: ${location.latitude}, ${location.longitude}")
+                    } ?: println("Button clicked! Location not available.")
+                }
+            ) {
+                Text("Send Location")
             }
         }
     }
