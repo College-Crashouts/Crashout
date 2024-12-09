@@ -1,46 +1,3 @@
-//package org.acjn.crashout
-//
-//import android.os.Build
-//import androidx.compose.foundation.layout.Box
-//import androidx.compose.runtime.Composable
-//import com.google.android.gms.maps.GoogleMap
-//import com.google.android.gms.maps.model.CameraPosition
-//import com.google.android.gms.maps.model.LatLng
-//import com.google.maps.android.compose.Marker
-//import com.google.maps.android.compose.rememberCameraPositionState
-//import com.google.maps.android.compose.rememberMarkerState
-//import androidx.compose.foundation.layout.fillMaxSize
-//import androidx.compose.ui.Modifier
-//import com.google.maps.android.compose.GoogleMap
-//
-//class AndroidPlatform : Platform {
-//    override val name: String = "Android ${Build.VERSION.SDK_INT}"
-//}
-//
-//actual fun getPlatform(): Platform = AndroidPlatform()
-//@Composable
-//actual fun MapComponent() {
-//    Box(
-//        modifier = Modifier.fillMaxSize(),
-//    ) {
-//        val coordinates = LatLng(19.068857, 72.833)
-//        val markerState = rememberMarkerState(position = coordinates)
-//        val cameraPositionState = rememberCameraPositionState {
-//            position = CameraPosition.fromLatLngZoom(coordinates, 10f)
-//        }
-//        GoogleMap(
-//            modifier = Modifier.fillMaxSize(),
-//            cameraPositionState = cameraPositionState
-//        ) {
-//            Marker(
-//                state = markerState,
-//                title = "Bandra West",
-//                snippet = "Mumbai"
-//            )
-//        }
-//    }
-//}
-
 package org.acjn.crashout
 
 import android.Manifest
@@ -48,14 +5,21 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Looper
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -69,6 +33,9 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.delay
+import androidx.compose.material.*
+import androidx.compose.material.icons.filled.*
+
 
 class AndroidPlatform : Platform {
     override val name: String = "Android ${Build.VERSION.SDK_INT}"
@@ -82,6 +49,8 @@ actual fun MapComponent() {
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     var userLocation by remember { mutableStateOf<LatLng?>(null) }
+    var showMap by remember { mutableStateOf(false) }
+    var showAccountInfo by remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -124,20 +93,46 @@ actual fun MapComponent() {
         }
     }
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
+    Column(
+        modifier = Modifier.fillMaxSize()
     ) {
-        GoogleMap(
-            modifier = Modifier.fillMaxSize(),
-            cameraPositionState = cameraPositionState
+        Box(
+            modifier = Modifier.weight(1f)
         ) {
-            userLocation?.let { location ->
-                Marker(
-                    state = rememberMarkerState(position = location),
-                    title = "Your Location",
-                    snippet = "This is your current location"
-                )
+            GoogleMap(
+                modifier = Modifier.fillMaxSize(),
+                cameraPositionState = cameraPositionState
+            ) {
+                userLocation?.let { location ->
+                    Marker(
+                        state = rememberMarkerState(position = location),
+                        title = "Your Location",
+                        snippet = "This is your current location"
+                    )
+                }
             }
+        }
+
+        BottomAppBar(
+            modifier = Modifier.fillMaxWidth(),
+            backgroundColor = MaterialTheme.colors.primary
+        ) {
+            Icon(
+                Icons.Filled.Home, "Home",
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { showMap = false; showAccountInfo = false })
+            Icon(
+                Icons.Filled.LocationOn, "Target",
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { /* target navigation */ })
+
+            Icon(
+                Icons.Filled.Person, "Profile",
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { showMap = false; showAccountInfo = true })
         }
     }
 }
@@ -165,7 +160,6 @@ fun fetchActiveLocationUpdates(
         locationCallback,
         Looper.getMainLooper()
     )
-
 }
 
 /**
