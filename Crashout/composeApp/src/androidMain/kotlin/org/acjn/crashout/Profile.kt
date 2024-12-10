@@ -60,9 +60,9 @@ actual fun Profile(userName: String, password: String) {
         var firebaseUser by remember { mutableStateOf<FirebaseUser?>(null) }
         var userEmail by remember { mutableStateOf(userName) } //PARAM FOR USER PW PULLED FROM LOGIN
         var userPassword by remember { mutableStateOf(password) } //NEW PARAM OF USER PW PULLED FROM LOGIN SCREEN
-        var showPassword by remember { mutableStateOf(false) }
-        var newPassword by remember { mutableStateOf("") }
-        var showChangePasswordDialog by remember { mutableStateOf(false) }
+        var showChangeNameDialog by remember { mutableStateOf(false) }
+        var newDisplayName by remember { mutableStateOf("") }
+        // var showChangePasswordDialog by remember { mutableStateOf(false) }
         var showMap by remember { mutableStateOf(true) }
         var showTarget by remember { mutableStateOf(false) }
 
@@ -108,100 +108,85 @@ actual fun Profile(userName: String, password: String) {
             ) {
                 if (showMap) {
                     MapComponent()
-                } else if (showTarget){
-                    Target()
-                }
-                    else {
+                } else if (showTarget) {
+                    kotlin.annotation.Target()
+                } else {
                     // Profile
                     Box(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
                         Image(
-                            painter = painterResource(Res.drawable.compose_multiplatform),  // replace this with profile image resource
+                            painter = painterResource(Res.drawable.compose_multiplatform),
                             contentDescription = "Profile Picture",
                             modifier = Modifier
                                 .size(100.dp)
                                 .clip(CircleShape),
                             contentScale = ContentScale.Crop
                         )
-                    }
+                        TextButton(
+                            onClick = { showChangeNameDialog = true },
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        ) {
+                            Text("Change Name")
+                        }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
 
-                    // Name
-                    Text(text = "Name:", style = MaterialTheme.typography.body1)
-                    Text(
-                        text =  userEmail, //TODO FIX TO GIVE USER AN ACTUAL NAME OR REMOVE
-                        style = MaterialTheme.typography.h6,
-                        color = Color(0xFFE91E63)
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Email
-                    Text(text = "Email:", style = MaterialTheme.typography.body1)
-                    Text(
-                        text = userEmail.let { email ->
-                            val username = email.substringBefore('@')
-                            "******@${email.substringAfter('@')}"
-                        } ?: "Unknown",
-                        style = MaterialTheme.typography.h6,
-                        color = Color(0xFFE91E63)
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Password Section
-                    Text(text = "Password:", style = MaterialTheme.typography.body1)
-                    TextButton(
-                        onClick = { showPassword = !showPassword },
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    ) {
-                        Text("View Password")
-                    }
-                    TextButton(
-                        onClick = { showChangePasswordDialog = true },
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    ) {
-                        Text("Change Password")
-                    }
-
-                    // Password change dialog
-                    if (showChangePasswordDialog) {
-                        AlertDialog(
-                            onDismissRequest = { showChangePasswordDialog = false },
-                            title = { Text("Change Password") },
-                            text = {
-                                TextField(
-                                    value = newPassword,
-                                    onValueChange = { newPassword = it },
-                                    placeholder = { Text("New Password") },
-                                    visualTransformation = PasswordVisualTransformation()
-                                )
-                            },
-                            confirmButton = {
-                                Button(onClick = {
-                                    scope.launch {
-                                        try {
-                                            firebaseUser?.updatePassword(newPassword)
-                                            showChangePasswordDialog = false
-                                            newPassword = ""
-                                        } catch (e: Exception) { }
-                                    }
-                                }) {
-                                    Text("Update")
-                                }
-                            },
-                            dismissButton = {
-                                Button(onClick = { showChangePasswordDialog = false }) {
-                                    Text("Cancel")
-                                }
-                            }
+                        // Name
+                        Text(text = "Name:", style = MaterialTheme.typography.body1)
+                        Text(
+                            text = userEmail, //TODO FIX TO GIVE USER AN ACTUAL NAME OR REMOVE
+                            style = MaterialTheme.typography.h6,
+                            color = Color(0xFFE91E63)
                         )
-                    }
 
-                    Spacer(modifier = Modifier.weight(1f))
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Email
+                        Text(text = "Email:", style = MaterialTheme.typography.body1)
+                        Text(
+                            text = firebaseUser?.email ?: "Unknown",
+                            style = MaterialTheme.typography.h6,
+                            color = Color(0xFFE91E63)
+                        )
+
+                        //Name change dialog
+                        if (showChangeNameDialog) {
+                            AlertDialog(
+                                onDismissRequest = { showChangeNameDialog = false },
+                                title = { Text("Change Display Name") },
+                                text = {
+                                    TextField(
+                                        value = newDisplayName,
+                                        onValueChange = { newDisplayName = it },
+                                        placeholder = { Text("New Display Name") }
+                                    )
+                                },
+                                confirmButton = {
+                                    Button(onClick = {
+                                        scope.launch {
+                                            try {
+                                                firebaseUser?.updateProfile(displayName = newDisplayName)
+                                                showChangeNameDialog = false
+                                                newDisplayName = ""
+                                            } catch (e: Exception) {
+                                            }
+                                        }
+                                    }) {
+                                        Text("Update")
+                                    }
+                                },
+                                dismissButton = {
+                                    Button(onClick = { showChangeNameDialog = false }) {
+                                        Text("Cancel")
+                                    }
+                                }
+                            )
+                        }
+
+                        //Spacer(modifier = Modifier.weight(1f))
+                    }
                 }
             }
         }
