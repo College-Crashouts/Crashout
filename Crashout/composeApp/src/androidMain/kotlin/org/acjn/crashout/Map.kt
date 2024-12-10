@@ -51,6 +51,7 @@ import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -74,9 +75,13 @@ import androidx.compose.material.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 
 class AndroidPlatform : Platform {
     override val name: String = "Android ${Build.VERSION.SDK_INT}"
@@ -91,6 +96,8 @@ actual fun MapComponent() {
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     var userLocation by remember { mutableStateOf<LatLng?>(null) }
     val markerState = remember { mutableStateOf<LatLng?>(null) }
+    var showMap by remember { mutableStateOf(false) }
+    var showAccountInfo by remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -146,11 +153,11 @@ actual fun MapComponent() {
             }
         }
 
-        // print the current coordinates
+        // Print the current coordinates
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 22.dp)
+                .padding(bottom = 72.dp) // Adjust padding to place button above BottomAppBar
         ) {
             Spacer(modifier = Modifier.height(100.dp))
             Button(
@@ -162,6 +169,30 @@ actual fun MapComponent() {
             ) {
                 Text("Send Location")
             }
+        }
+
+        BottomAppBar(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth(),
+            backgroundColor = MaterialTheme.colors.primary
+        ) {
+            Icon(
+                Icons.Filled.Home, "Home",
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { showMap = false; showAccountInfo = false })
+            Icon(
+                Icons.Filled.LocationOn, "Target",
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { /* target navigation */ })
+
+            Icon(
+                Icons.Filled.Person, "Profile",
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { showMap = false; showAccountInfo = true })
         }
     }
 }
