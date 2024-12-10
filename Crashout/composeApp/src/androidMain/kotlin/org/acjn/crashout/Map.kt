@@ -5,19 +5,14 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Looper
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.material.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -32,22 +27,18 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.delay
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.Text
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
-import crashout.composeapp.generated.resources.Res
-import crashout.composeapp.generated.resources.compose_multiplatform
-import dev.gitlive.firebase.Firebase
-import dev.gitlive.firebase.auth.FirebaseAuth
-import dev.gitlive.firebase.auth.FirebaseUser
-import dev.gitlive.firebase.auth.auth
-import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.painterResource
-
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 
 class AndroidPlatform : Platform {
     override val name: String = "Android ${Build.VERSION.SDK_INT}"
@@ -61,6 +52,7 @@ actual fun MapComponent() {
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     var userLocation by remember { mutableStateOf<LatLng?>(null) }
+    val markerState = remember { mutableStateOf<LatLng?>(null) }
     var showMap by remember { mutableStateOf(false) }
     var showAccountInfo by remember { mutableStateOf(false) }
 
@@ -94,62 +86,48 @@ actual fun MapComponent() {
         }
     }
 
-    // Periodically log location every 30 seconds
+    // Update marker and camera position whenever userLocation changes
     LaunchedEffect(userLocation) {
-        while (true) {
-            userLocation?.let { location ->
-                cameraPositionState.position = CameraPosition.fromLatLngZoom(location, 15f)
-                println("User's current location: ${location.latitude}, ${location.longitude}")
-            }
-            delay(15_000L)
+        userLocation?.let { location ->
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(location, 15f)
+            markerState.value = location
         }
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
+    Box(
+        modifier = Modifier.fillMaxSize(),
     ) {
-        Box(
-            modifier = Modifier.weight(1f)
+        GoogleMap(
+            modifier = Modifier.fillMaxSize(),
+            cameraPositionState = cameraPositionState
         ) {
-            GoogleMap(
-                modifier = Modifier.fillMaxSize(),
-                cameraPositionState = cameraPositionState
-            ) {
-                userLocation?.let { location ->
-                    Marker(
-                        state = rememberMarkerState(position = location),
-                        title = "Your Location",
-                        snippet = "This is your current location"
-                    )
-                }
+            markerState.value?.let { location ->
+                Marker(
+                    state = rememberMarkerState(position = location),
+                    title = "Your Location",
+                    snippet = "This is your current location"
+                )
             }
         }
 
-//        BottomAppBar(
-//            modifier = Modifier.fillMaxWidth(),
-//            backgroundColor = MaterialTheme.colors.primary
-//        ) {
-//            Icon(
-//                Icons.Filled.Home, "Home",
-//                modifier = Modifier
-//                    .weight(1f)
-//                    .clickable { showMap = false; showAccountInfo = false })
-//            Icon(
-//                Icons.Filled.LocationOn, "Target",
-//                modifier = Modifier
-//                    .weight(1f)
-//                    .clickable { /* target navigation */ })
-//
-//            Icon(
-//                Icons.Filled.Person, "Profile",
-//                modifier = Modifier
-//                    .weight(1f)
-//                    .clickable { showMap = false; showAccountInfo = true })
-//        }
+        // Print the current coordinates
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 12.dp)
+        ) {
+            Spacer(modifier = Modifier.height(100.dp))
+            Button(
+                onClick = {
+                    userLocation?.let { location ->
+                        println("Button clicked! Current location: ${location.latitude}, ${location.longitude}")
+                    } ?: println("Button clicked! Location not available.")
+                }
+            ) {
+                Text("Send Location")
+            }
+        }
     }
-    when {showAccountInfo ->{
-        Login()
-    }}
 }
 
 @SuppressLint("MissingPermission")
@@ -175,6 +153,7 @@ fun fetchActiveLocationUpdates(
         locationCallback,
         Looper.getMainLooper()
     )
+
 }
 
 /**
@@ -184,5 +163,3 @@ fun updateMarkers(markers: MutableList<LatLng>, newLocation: LatLng) {
     markers.clear() // Remove old markers
     markers.add(newLocation) // Add the new marker
 }
-
-
