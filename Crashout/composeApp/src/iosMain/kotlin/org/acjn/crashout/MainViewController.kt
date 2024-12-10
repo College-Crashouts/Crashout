@@ -34,3 +34,12 @@ actual fun Profile(userName: String, password: String) {
         modifier = Modifier.fillMaxSize(),
     )
 }
+
+@OptIn(ExperimentalForeignApi::class)
+@Composable
+actual fun Target() {
+    UIKitViewController(
+        factory = mapViewController,
+        modifier = Modifier.fillMaxSize(),
+    )
+}

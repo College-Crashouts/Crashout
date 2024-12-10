@@ -24,6 +24,8 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
@@ -48,6 +50,7 @@ import dev.gitlive.firebase.auth.auth
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
+
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 actual fun Profile(userName: String, password: String) {
@@ -55,12 +58,13 @@ actual fun Profile(userName: String, password: String) {
         val scope = rememberCoroutineScope()
         val auth: FirebaseAuth = remember { Firebase.auth }
         var firebaseUser by remember { mutableStateOf<FirebaseUser?>(null) }
-        var userEmail by remember { mutableStateOf(userName) }
-        var userPassword by remember { mutableStateOf(password) }
+        var userEmail by remember { mutableStateOf(userName) } //PARAM FOR USER PW PULLED FROM LOGIN
+        var userPassword by remember { mutableStateOf(password) } //NEW PARAM OF USER PW PULLED FROM LOGIN SCREEN
         var showPassword by remember { mutableStateOf(false) }
         var newPassword by remember { mutableStateOf("") }
         var showChangePasswordDialog by remember { mutableStateOf(false) }
-        var showMap by remember { mutableStateOf(false) }
+        var showMap by remember { mutableStateOf(true) }
+        var showTarget by remember { mutableStateOf(false) }
 
         Scaffold(
             bottomBar = {
@@ -68,20 +72,29 @@ actual fun Profile(userName: String, password: String) {
                     backgroundColor = MaterialTheme.colors.primary
                 ) {
                     Icon(
-                        Icons.Filled.Home, "Home", // NAV TO HOME
+                        Icons.Filled.Star, "Home", // NAV TO HOME
                         modifier = Modifier
                             .weight(1f)
-                            .clickable { /* target navigation */ })
+                            .clickable {
+                                showTarget = true
+                                showMap = false
+                            })
                     Icon(
                         Icons.Filled.LocationOn, "Target", // NAV TO MAP
                         modifier = Modifier
                             .weight(1f)
-                            .clickable { showMap = true })
+                            .clickable {
+                                showMap = true
+                                showTarget = false
+                            })
                     Icon(
                         Icons.Filled.Person, "Profile", // NAV TO PROFILE
                         modifier = Modifier
                             .weight(1f)
-                            .clickable { showMap = false }
+                            .clickable {
+                                showMap = false
+                                showTarget = false
+                            }
                     )
                 }
             }
@@ -95,7 +108,10 @@ actual fun Profile(userName: String, password: String) {
             ) {
                 if (showMap) {
                     MapComponent()
-                } else {
+                } else if (showTarget){
+                    Target()
+                }
+                    else {
                     // Profile
                     Box(
                         modifier = Modifier.fillMaxWidth(),
@@ -116,7 +132,7 @@ actual fun Profile(userName: String, password: String) {
                     // Name
                     Text(text = "Name:", style = MaterialTheme.typography.body1)
                     Text(
-                        text = firebaseUser?.displayName ?: "Unknown",
+                        text =  userEmail, //TODO FIX TO GIVE USER AN ACTUAL NAME OR REMOVE
                         style = MaterialTheme.typography.h6,
                         color = Color(0xFFE91E63)
                     )
@@ -126,7 +142,7 @@ actual fun Profile(userName: String, password: String) {
                     // Email
                     Text(text = "Email:", style = MaterialTheme.typography.body1)
                     Text(
-                        text = firebaseUser?.email?.let { email ->
+                        text = userEmail.let { email ->
                             val username = email.substringBefore('@')
                             "******@${email.substringAfter('@')}"
                         } ?: "Unknown",
