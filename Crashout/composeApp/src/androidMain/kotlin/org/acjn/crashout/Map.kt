@@ -157,7 +157,7 @@ actual fun MapComponent() {
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 72.dp) // Adjust padding to place button above BottomAppBar
+                .padding(bottom = 12.dp)
         ) {
             Spacer(modifier = Modifier.height(100.dp))
             Button(
@@ -169,30 +169,6 @@ actual fun MapComponent() {
             ) {
                 Text("Send Location")
             }
-        }
-
-        BottomAppBar(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth(),
-            backgroundColor = MaterialTheme.colors.primary
-        ) {
-            Icon(
-                Icons.Filled.Home, "Home",
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable { showMap = false; showAccountInfo = false })
-            Icon(
-                Icons.Filled.LocationOn, "Target",
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable { /* target navigation */ })
-
-            Icon(
-                Icons.Filled.Person, "Profile",
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable { showMap = false; showAccountInfo = true })
         }
     }
 }
