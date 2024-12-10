@@ -1,46 +1,3 @@
-//package org.acjn.crashout
-//
-//import android.os.Build
-//import androidx.compose.foundation.layout.Box
-//import androidx.compose.runtime.Composable
-//import com.google.android.gms.maps.GoogleMap
-//import com.google.android.gms.maps.model.CameraPosition
-//import com.google.android.gms.maps.model.LatLng
-//import com.google.maps.android.compose.Marker
-//import com.google.maps.android.compose.rememberCameraPositionState
-//import com.google.maps.android.compose.rememberMarkerState
-//import androidx.compose.foundation.layout.fillMaxSize
-//import androidx.compose.ui.Modifier
-//import com.google.maps.android.compose.GoogleMap
-//
-//class AndroidPlatform : Platform {
-//    override val name: String = "Android ${Build.VERSION.SDK_INT}"
-//}
-//
-//actual fun getPlatform(): Platform = AndroidPlatform()
-//@Composable
-//actual fun MapComponent() {
-//    Box(
-//        modifier = Modifier.fillMaxSize(),
-//    ) {
-//        val coordinates = LatLng(19.068857, 72.833)
-//        val markerState = rememberMarkerState(position = coordinates)
-//        val cameraPositionState = rememberCameraPositionState {
-//            position = CameraPosition.fromLatLngZoom(coordinates, 10f)
-//        }
-//        GoogleMap(
-//            modifier = Modifier.fillMaxSize(),
-//            cameraPositionState = cameraPositionState
-//        ) {
-//            Marker(
-//                state = markerState,
-//                title = "Bandra West",
-//                snippet = "Mumbai"
-//            )
-//        }
-//    }
-//}
-
 package org.acjn.crashout
 
 import android.Manifest
@@ -51,6 +8,7 @@ import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -69,6 +27,18 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.delay
+import androidx.compose.material.Button
+import androidx.compose.material.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 
 class AndroidPlatform : Platform {
     override val name: String = "Android ${Build.VERSION.SDK_INT}"
@@ -82,6 +52,9 @@ actual fun MapComponent() {
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     var userLocation by remember { mutableStateOf<LatLng?>(null) }
+    val markerState = remember { mutableStateOf<LatLng?>(null) }
+    var showMap by remember { mutableStateOf(false) }
+    var showAccountInfo by remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -113,14 +86,11 @@ actual fun MapComponent() {
         }
     }
 
-    // Periodically log location every 30 seconds
+    // Update marker and camera position whenever userLocation changes
     LaunchedEffect(userLocation) {
-        while (true) {
-            userLocation?.let { location ->
-                cameraPositionState.position = CameraPosition.fromLatLngZoom(location, 15f)
-                println("User's current location: ${location.latitude}, ${location.longitude}")
-            }
-            delay(15_000L)
+        userLocation?.let { location ->
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(location, 15f)
+            markerState.value = location
         }
     }
 
@@ -131,12 +101,30 @@ actual fun MapComponent() {
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState
         ) {
-            userLocation?.let { location ->
+            markerState.value?.let { location ->
                 Marker(
                     state = rememberMarkerState(position = location),
                     title = "Your Location",
                     snippet = "This is your current location"
                 )
+            }
+        }
+
+        // Print the current coordinates
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 12.dp)
+        ) {
+            Spacer(modifier = Modifier.height(100.dp))
+            Button(
+                onClick = {
+                    userLocation?.let { location ->
+                        println("Button clicked! Current location: ${location.latitude}, ${location.longitude}")
+                    } ?: println("Button clicked! Location not available.")
+                }
+            ) {
+                Text("Send Location")
             }
         }
     }

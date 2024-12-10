@@ -12,7 +12,7 @@ fun MainViewController(
     mapUIViewController: () -> UIViewController
 ) = ComposeUIViewController {
     mapViewController = mapUIViewController
-    App()
+    Login()
 }
 
 lateinit var mapViewController: () -> UIViewController
@@ -20,6 +20,24 @@ lateinit var mapViewController: () -> UIViewController
 @OptIn(ExperimentalForeignApi::class)
 @Composable
 actual fun MapComponent() {
+    UIKitViewController(
+        factory = mapViewController,
+        modifier = Modifier.fillMaxSize(),
+    )
+}
+
+@OptIn(ExperimentalForeignApi::class)
+@Composable
+actual fun Profile(userName: String, password: String) {
+    UIKitViewController(
+        factory = mapViewController,
+        modifier = Modifier.fillMaxSize(),
+    )
+}
+
+@OptIn(ExperimentalForeignApi::class)
+@Composable
+actual fun Target() {
     UIKitViewController(
         factory = mapViewController,
         modifier = Modifier.fillMaxSize(),
