@@ -81,7 +81,7 @@ actual fun Profile(userName: String, password: String) {
                 if (showMap) {
                     MapComponent()
                 } else if (showTarget){
-                    kotlin.annotation.Target()
+                    Target()
                 }
                 else {
                     // Profile
